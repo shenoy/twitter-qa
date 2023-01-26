@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0nqekc2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.6.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:process id="TwitterQAProcess" name="Twitter QA Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Tweet written" camunda:formKey="embedded:app:forms/start.html">
+      <bpmn:outgoing>Flow_0h3hhfu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0h3hhfu" sourceRef="StartEvent_1" targetRef="review-tweet" />
+    <bpmn:exclusiveGateway id="Gateway_19xkace" name="Tweet Approved ?">
+      <bpmn:incoming>Flow_1jdqp3w</bpmn:incoming>
+      <bpmn:outgoing>Flow_01rf1je</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1at0r7x</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1jdqp3w" sourceRef="review-tweet" targetRef="Gateway_19xkace" />
+    <bpmn:sequenceFlow id="Flow_01rf1je" name="Yes" sourceRef="Gateway_19xkace" targetRef="publish-tweet">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{approved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0igb0wc" name="Tweet published">
+      <bpmn:incoming>Flow_1xodnib</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1xodnib" sourceRef="publish-tweet" targetRef="Event_0igb0wc" />
+    <bpmn:sequenceFlow id="Flow_1at0r7x" name="No" sourceRef="Gateway_19xkace" targetRef="notify-employee">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{approved == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0e34swc" name="Tweet Rejected">
+      <bpmn:incoming>Flow_0o6ta6d</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0o6ta6d" sourceRef="notify-employee" targetRef="Event_0e34swc" />
+    <bpmn:scriptTask id="notify-employee" name="Notify Employee" scriptFormat="javascript">
+      <bpmn:incoming>Flow_1at0r7x</bpmn:incoming>
+      <bpmn:outgoing>Flow_0o6ta6d</bpmn:outgoing>
+      <bpmn:script>print("Tweet rejected");</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="publish-tweet" name="Publish Tweet" camunda:class="com.camunda.training.delegate.CreateTweetDelegate">
+      <bpmn:incoming>Flow_01rf1je</bpmn:incoming>
+      <bpmn:outgoing>Flow_1xodnib</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="review-tweet" name="Review Tweet" camunda:formKey="embedded:app:forms/reviewtweet.html" camunda:candidateGroups="management">
+      <bpmn:incoming>Flow_0h3hhfu</bpmn:incoming>
+      <bpmn:outgoing>Flow_1jdqp3w</bpmn:outgoing>
+    </bpmn:userTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="TwitterQAProcess">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="165" y="142" width="64" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_19xkace_di" bpmnElement="Gateway_19xkace" isMarkerVisible="true">
+        <dc:Bounds x="425" y="92" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="406" y="62" width="88" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0igb0wc_di" bpmnElement="Event_0igb0wc">
+        <dc:Bounds x="692" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="671" y="142" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0e34swc_di" bpmnElement="Event_0e34swc">
+        <dc:Bounds x="692" y="212" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="673" y="255" width="75" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0wbmdh1_di" bpmnElement="notify-employee">
+        <dc:Bounds x="530" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0yct40i_di" bpmnElement="publish-tweet">
+        <dc:Bounds x="530" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1awbpq9_di" bpmnElement="review-tweet">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0h3hhfu_di" bpmnElement="Flow_0h3hhfu">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jdqp3w_di" bpmnElement="Flow_1jdqp3w">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="425" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01rf1je_di" bpmnElement="Flow_01rf1je">
+        <di:waypoint x="475" y="117" />
+        <di:waypoint x="530" y="117" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="494" y="99" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xodnib_di" bpmnElement="Flow_1xodnib">
+        <di:waypoint x="630" y="117" />
+        <di:waypoint x="692" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1at0r7x_di" bpmnElement="Flow_1at0r7x">
+        <di:waypoint x="450" y="142" />
+        <di:waypoint x="450" y="230" />
+        <di:waypoint x="530" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="458" y="183" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o6ta6d_di" bpmnElement="Flow_0o6ta6d">
+        <di:waypoint x="630" y="230" />
+        <di:waypoint x="692" y="230" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
